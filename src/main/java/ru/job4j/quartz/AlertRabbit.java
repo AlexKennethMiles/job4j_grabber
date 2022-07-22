@@ -16,26 +16,32 @@ import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
     public static void main(String[] args) {
+        Properties config = loadConfig();
         try {
-            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-            scheduler.start();
-            Properties config = loadConfig();
-            Connection cn = getConnection(config);
-            JobDataMap data = new JobDataMap();
-            data.put("conn", cn);
-            JobDetail job = newJob(Rabbit.class)
-                    .usingJobData(data)
-                    .build();
-            SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(Integer.parseInt(config.getProperty("rabbit.interval")))
-                    .repeatForever();
-            Trigger trigger = newTrigger()
-                    .startNow()
-                    .withSchedule(times)
-                    .build();
-            scheduler.scheduleJob(job, trigger);
-            Thread.sleep(10000);
-            scheduler.shutdown();
+            try (Connection cn = DriverManager.getConnection(
+                    config.getProperty("rabbit.url"),
+                    config.getProperty("rabbit.username"),
+                    config.getProperty("rabbit.password"))) {
+                Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+                scheduler.start();
+                JobDataMap data = new JobDataMap();
+                data.put("conn", cn);
+                JobDetail job = newJob(Rabbit.class)
+                        .usingJobData(data)
+                        .build();
+                SimpleScheduleBuilder times = simpleSchedule()
+                        .withIntervalInSeconds(Integer.parseInt(config.getProperty("rabbit.interval")))
+                        .repeatForever();
+                Trigger trigger = newTrigger()
+                        .startNow()
+                        .withSchedule(times)
+                        .build();
+                scheduler.scheduleJob(job, trigger);
+                Thread.sleep(10000);
+                scheduler.shutdown();
+            } catch (SQLException throwable) {
+                throwable.printStackTrace();
+            }
         } catch (SchedulerException | InterruptedException se) {
             se.printStackTrace();
         }
@@ -49,21 +55,6 @@ public class AlertRabbit {
             e.printStackTrace();
         }
         return config;
-    }
-
-    public static Connection getConnection(Properties config) {
-        try {
-            Class.forName(config.getProperty("rabbit.driver-class-name"));
-            return DriverManager.getConnection(
-                    config.getProperty("rabbit.url"),
-                    config.getProperty("rabbit.username"),
-                    config.getProperty("rabbit.password")
-
-            );
-        } catch (SQLException | ClassNotFoundException throwable) {
-            throwable.printStackTrace();
-        }
-        return null;
     }
 
     public static class Rabbit implements Job {
