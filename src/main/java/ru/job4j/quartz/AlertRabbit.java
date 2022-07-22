@@ -12,11 +12,9 @@ import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
-    private static Properties config = new Properties();
-
     public static void main(String[] args) {
         try {
-            loadConfig();
+            Properties config = loadConfig();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDetail job = newJob(Rabbit.class).build();
@@ -33,12 +31,14 @@ public class AlertRabbit {
         }
     }
 
-    public static void loadConfig() {
+    public static Properties loadConfig() {
+        Properties config = new Properties();
         try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             config.load(in);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return config;
     }
 
     public static class Rabbit implements Job {
