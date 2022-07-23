@@ -6,7 +6,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import ru.job4j.grabber.until.DateTimeParser;
-import ru.job4j.grabber.until.HabrCareerDataParser;
+import ru.job4j.grabber.until.HabrCareerDateTimeParser;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -27,7 +27,7 @@ public class HabrCareerParse implements Parse {
     }
 
     public static void main(String[] args) {
-        HabrCareerParse hcp = new HabrCareerParse(new HabrCareerDataParser());
+        HabrCareerParse hcp = new HabrCareerParse(new HabrCareerDateTimeParser());
         for (int i = 1; i <= PAGE_COUNT; i++) {
             hcp.list(PAGE_LINK + PAGE_NUMBER + PAGE_COUNT);
         }

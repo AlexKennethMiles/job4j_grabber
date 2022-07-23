@@ -1,6 +1,6 @@
 package ru.job4j.grabber;
 
-import ru.job4j.grabber.until.HabrCareerDataParser;
+import ru.job4j.grabber.until.HabrCareerDateTimeParser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,10 +30,10 @@ public class PsqlStore implements Store, AutoCloseable {
     }
 
     public static void main(String[] args) {
-        HabrCareerParse hcp = new HabrCareerParse(new HabrCareerDataParser());
+        HabrCareerParse hcp = new HabrCareerParse(new HabrCareerDateTimeParser());
         List<Post> pool = hcp.list("https://career.habr.com/vacancies/java_developer");
         Properties cfg = new Properties();
-        try (InputStream in = PsqlStore.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
+        try (InputStream in = PsqlStore.class.getClassLoader().getResourceAsStream("app.properties")) {
             cfg.load(in);
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,7 +47,9 @@ public class PsqlStore implements Store, AutoCloseable {
     @Override
     public void save(Post post) {
         try (PreparedStatement statement = cnn.prepareStatement(
-                "insert into post(name, text, link, created) values  (?, ?, ?, ?)")) {
+                "insert into post(name, text, link, created)"
+                        + "values  (?, ?, ?, ?)"
+                        + "on conflict (link) do nothing ")) {
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getDescription());
             statement.setString(3, post.getLink());
