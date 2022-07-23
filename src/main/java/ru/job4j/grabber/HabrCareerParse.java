@@ -20,7 +20,7 @@ public class HabrCareerParse implements Parse {
     private static final String PAGE_NUMBER = "?page=";
     private static final int PAGE_COUNT = 5;
     private final DateTimeParser dateTimeParser;
-    private List<Post> posts = new ArrayList<>();
+    private final List<Post> posts = new ArrayList<>();
 
     public HabrCareerParse(DateTimeParser dateTimeParser) {
         this.dateTimeParser = dateTimeParser;
@@ -29,8 +29,13 @@ public class HabrCareerParse implements Parse {
     public static void main(String[] args) {
         HabrCareerParse hcp = new HabrCareerParse(new HabrCareerDataParser());
         for (int i = 1; i <= PAGE_COUNT; i++) {
-            hcp.list(PAGE_LINK);
+            hcp.list(PAGE_LINK + PAGE_NUMBER + PAGE_COUNT);
         }
+        hcp.getPosts().forEach(System.out::println);
+    }
+
+    public List<Post> getPosts() {
+        return posts;
     }
 
     @Override
