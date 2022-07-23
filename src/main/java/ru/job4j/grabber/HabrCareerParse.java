@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class HabrCareerParse implements Parse {
     private static final String SOURCE_LINK = "https://career.habr.com";
@@ -38,13 +39,14 @@ public class HabrCareerParse implements Parse {
                 Elements rows = document.select(".vacancy-card__inner");
                 rows.forEach(row -> {
                     Element titleElement = row.select(".vacancy-card__title").first();
+                    assert titleElement != null;
                     Element linkElement = titleElement.child(0);
                     String vacancyName = titleElement.text();
                     String vacancyLink = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
                     Element dateOfTheElement = row.select(".vacancy-card__date").first();
+                    assert dateOfTheElement != null;
                     Element date = dateOfTheElement.child(0);
                     LocalDateTime vacancyDate = dateTimeParser.parse(date.attr("datetime"));
-                    HabrCareerDataParser parseDate = new HabrCareerDataParser();
                     rsl.add(new Post(
                             vacancyName,
                             vacancyLink,
@@ -64,7 +66,7 @@ public class HabrCareerParse implements Parse {
         try {
             Document vacancy = connectToVacancy.get();
             Elements rows = vacancy.select(".collapsible-description");
-            return rows.first().text();
+            return Objects.requireNonNull(rows.first()).text();
         } catch (IOException e) {
             e.printStackTrace();
         }
