@@ -3,14 +3,14 @@ package ru.job4j.grabber;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class PostModel {
+public class Post {
     private int id;
     private String title;
     private String link;
     private String description;
     private LocalDateTime created;
 
-    public PostModel(int id, String title, String link, String description, LocalDateTime created) {
+    public Post(int id, String title, String link, String description, LocalDateTime created) {
         this.id = id;
         this.title = title;
         this.link = link;
@@ -18,7 +18,7 @@ public class PostModel {
         this.created = created;
     }
 
-    public PostModel(String title, String link, String description, LocalDateTime created) {
+    public Post(String title, String link, String description, LocalDateTime created) {
         this.title = title;
         this.link = link;
         this.description = description;
@@ -73,10 +73,10 @@ public class PostModel {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PostModel postModel = (PostModel) o;
-        return id == postModel.id
-                && Objects.equals(title, postModel.title)
-                && Objects.equals(link, postModel.link);
+        Post post = (Post) o;
+        return id == post.id
+                && Objects.equals(title, post.title)
+                && Objects.equals(link, post.link);
     }
 
     @Override
