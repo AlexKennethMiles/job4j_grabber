@@ -29,8 +29,25 @@ public class HabrCareerParse {
                 Element date = dateOfTheElement.child(0);
                 String vacancyDate = date.attr("datetime");
                 HabrCareerDataParser parseDate = new HabrCareerDataParser();
-                System.out.printf("%s %s %s%n", vacancyName, link, parseDate.parse(vacancyDate));
+                System.out.printf("%s %s %s%n %s%n",
+                        vacancyName,
+                        link,
+                        parseDate.parse(vacancyDate),
+                        retrieveDescription(link));
             });
         }
+    }
+
+    private static String retrieveDescription(String link) {
+        Connection connectToVacancy = Jsoup.connect(link);
+        String description = null;
+        try {
+            Document vacancy = connectToVacancy.get();
+            Elements rows = vacancy.select(".collapsible-description");
+            return rows.first().text();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return description;
     }
 }
