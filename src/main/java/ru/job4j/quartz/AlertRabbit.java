@@ -18,6 +18,7 @@ public class AlertRabbit {
     public static void main(String[] args) {
         Properties config = loadConfig();
         try {
+            Class.forName(config.getProperty("rabbit.driver-class-name"));
             try (Connection cn = DriverManager.getConnection(
                     config.getProperty("rabbit.url"),
                     config.getProperty("rabbit.username"),
@@ -42,7 +43,7 @@ public class AlertRabbit {
             } catch (SQLException throwable) {
                 throwable.printStackTrace();
             }
-        } catch (SchedulerException | InterruptedException se) {
+        } catch (SchedulerException | InterruptedException | ClassNotFoundException se) {
             se.printStackTrace();
         }
     }
