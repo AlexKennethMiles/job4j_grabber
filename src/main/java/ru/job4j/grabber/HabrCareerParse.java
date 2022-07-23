@@ -32,7 +32,7 @@ public class HabrCareerParse implements Parse {
     @Override
     public List<Post> list(String link) {
         List<Post> rsl = new ArrayList<>();
-        for (int i = 1; i < 2; i++) {
+        for (int i = 1; i < 6; i++) {
             try {
                 Connection connection = Jsoup.connect(link + PAGE_NUMBER + i);
                 Document document = connection.get();
@@ -61,7 +61,7 @@ public class HabrCareerParse implements Parse {
         return rsl;
     }
 
-    private static String retrieveDescription(String link) {
+    private String retrieveDescription(String link) {
         Connection connectToVacancy = Jsoup.connect(link);
         try {
             Document vacancy = connectToVacancy.get();
