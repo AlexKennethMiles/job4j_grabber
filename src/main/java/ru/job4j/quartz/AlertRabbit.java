@@ -18,11 +18,11 @@ public class AlertRabbit {
     public static void main(String[] args) {
         Properties config = loadConfig();
         try {
-            Class.forName(config.getProperty("rabbit.driver-class-name"));
+            Class.forName(config.getProperty("jdbc.driver"));
             try (Connection cn = DriverManager.getConnection(
-                    config.getProperty("rabbit.url"),
-                    config.getProperty("rabbit.username"),
-                    config.getProperty("rabbit.password"))) {
+                    config.getProperty("url"),
+                    config.getProperty("username"),
+                    config.getProperty("password"))) {
                 Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
                 scheduler.start();
                 JobDataMap data = new JobDataMap();

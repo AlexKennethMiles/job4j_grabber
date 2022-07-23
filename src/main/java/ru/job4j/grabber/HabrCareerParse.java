@@ -75,8 +75,8 @@ public class HabrCareerParse implements Parse {
         LocalDateTime vacancyDate = dateTimeParser.parse(date.attr("datetime"));
         posts.add(new Post(
                 vacancyName,
-                vacancyLink,
                 retrieveDescription(vacancyLink),
+                vacancyLink,
                 vacancyDate)
         );
     }
