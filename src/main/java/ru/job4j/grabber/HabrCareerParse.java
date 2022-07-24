@@ -20,7 +20,6 @@ public class HabrCareerParse implements Parse {
     private static final String PAGE_NUMBER = "?page=";
     private static final int PAGE_COUNT = 5;
     private final DateTimeParser dateTimeParser;
-    private final List<Post> posts = new ArrayList<>();
 
     public HabrCareerParse(DateTimeParser dateTimeParser) {
         this.dateTimeParser = dateTimeParser;
@@ -28,25 +27,21 @@ public class HabrCareerParse implements Parse {
 
     public static void main(String[] args) {
         HabrCareerParse hcp = new HabrCareerParse(new HabrCareerDateTimeParser());
-        for (int i = 1; i <= PAGE_COUNT; i++) {
-            hcp.list(PAGE_LINK + PAGE_NUMBER + PAGE_COUNT);
-        }
-        hcp.getPosts().forEach(System.out::println);
-    }
-
-    public List<Post> getPosts() {
-        return posts;
+        hcp.list(PAGE_LINK + PAGE_NUMBER).forEach(System.out::println);
     }
 
     @Override
     public List<Post> list(String link) {
-        try {
-            Connection connection = Jsoup.connect(link);
-            Document document = connection.get();
-            Elements rows = document.select(".vacancy-card__inner");
-            rows.forEach(this::parsePost);
-        } catch (IllegalArgumentException | IOException e) {
-            e.printStackTrace();
+        List<Post> posts = new ArrayList<>();
+        for (int i = 1; i <= PAGE_COUNT; i++) {
+            try {
+                Connection connection = Jsoup.connect(link + "PAGE_COUNT");
+                Document document = connection.get();
+                Elements rows = document.select(".vacancy-card__inner");
+                rows.forEach(row -> posts.add(parsePost(row)));
+            } catch (IllegalArgumentException | IOException e) {
+                e.printStackTrace();
+            }
         }
         return posts;
     }
@@ -63,7 +58,7 @@ public class HabrCareerParse implements Parse {
         return null;
     }
 
-    private void parsePost(Element row) {
+    private Post parsePost(Element row) {
         Element titleElement = row.select(".vacancy-card__title").first();
         assert titleElement != null;
         Element linkElement = titleElement.child(0);
@@ -73,11 +68,11 @@ public class HabrCareerParse implements Parse {
         assert dateOfTheElement != null;
         Element date = dateOfTheElement.child(0);
         LocalDateTime vacancyDate = dateTimeParser.parse(date.attr("datetime"));
-        posts.add(new Post(
+        return new Post(
                 vacancyName,
                 retrieveDescription(vacancyLink),
                 vacancyLink,
-                vacancyDate)
+                vacancyDate
         );
     }
 }
