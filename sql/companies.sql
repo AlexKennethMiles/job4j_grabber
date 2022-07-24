@@ -38,17 +38,19 @@ insert into person values (18, 'Carl Bennett', 5);
 insert into person values (19, 'James Hudson', 5);
 insert into person values (20, 'Edwin Burgess', 5);
 
-select * from person where company_id!=5;
+select p.name, c.name
+from person p
+         left join company c
+                   on p.company_id = c.id
+where p.company_id != 5;
 
-select p.name, c.name from person p
-left join company c
-on p.company_id=c.id;
-
-select c.name, count(*) as "Кол-во персонала" from company c
-left join person p
-on c.id=p.company_id
+select c.name, count(*) as "Кол-во персонала"
+from company c
+         left join person p
+                   on c.id = p.company_id
 group by c.name
-having  count(*) = (select max(cnt) from (select count(*) as cnt from company c
-left join person p
-on c.id=p.company_id
-group by c.name) as abc);
+having count(*) = (select max(cnt)
+                   from (select count(*) as cnt
+                         from person p
+                         group by p.company_id) as abc
+);
