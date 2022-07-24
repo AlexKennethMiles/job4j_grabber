@@ -31,17 +31,20 @@ public class PsqlStore implements Store, AutoCloseable {
 
     public static void main(String[] args) {
         HabrCareerParse hcp = new HabrCareerParse(new HabrCareerDateTimeParser());
-        List<Post> pool = hcp.list("https://career.habr.com/vacancies/java_developer");
+        List<Post> pool = hcp.list("https://career.habr.com/vacancies/java_developer?page=");
         Properties cfg = new Properties();
         try (InputStream in = PsqlStore.class.getClassLoader().getResourceAsStream("app.properties")) {
             cfg.load(in);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        PsqlStore psqlStore = new PsqlStore(cfg);
-        pool.forEach(psqlStore::save);
-        psqlStore.getAll().forEach(System.out::println);
-        System.out.println(psqlStore.findById(1));
+        try (PsqlStore psqlStore = new PsqlStore(cfg)) {
+            pool.forEach(psqlStore::save);
+            psqlStore.getAll().forEach(System.out::println);
+            System.out.println(psqlStore.findById(1));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -66,13 +69,7 @@ public class PsqlStore implements Store, AutoCloseable {
         try (Statement statement = cnn.createStatement()) {
             ResultSet pool = statement.executeQuery("select * from post");
             while (pool.next()) {
-                rsl.add(new Post(
-                        pool.getInt("id"),
-                        pool.getString("name"),
-                        pool.getString("text"),
-                        pool.getString("link"),
-                        pool.getTimestamp("created").toLocalDateTime()
-                ));
+                rsl.add(getPostFromResultSet(pool));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -82,25 +79,33 @@ public class PsqlStore implements Store, AutoCloseable {
 
     @Override
     public Post findById(int id) {
-        Post rsl = null;
         try (PreparedStatement statement = cnn.prepareStatement(
                 "select * from post where id=?"
         )) {
             statement.setInt(1, id);
             ResultSet pool = statement.executeQuery();
             if (pool.next()) {
-                rsl = new Post(
-                        pool.getInt("id"),
-                        pool.getString("name"),
-                        pool.getString("text"),
-                        pool.getString("link"),
-                        pool.getTimestamp("created").toLocalDateTime()
-                );
+                return getPostFromResultSet(pool);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return rsl;
+        return null;
+    }
+
+    public Post getPostFromResultSet(ResultSet rs) {
+        try {
+            return new Post(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("text"),
+                    rs.getString("link"),
+                    rs.getTimestamp("created").toLocalDateTime()
+            );
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
