@@ -17,10 +17,9 @@ public class GCDemo {
 
     public static void main(String[] args) {
         info();
-        for (int i = 0; i < 10; i++) {
-            User u = new User(i, "N" + i, (int) (Math.random() * 100));
+        for (int i = 0; i < 17985; i++) {
+            new User(i, "N" + i, (int) (Math.random() * 100));
         }
-        System.gc();
         info();
     }
 }
